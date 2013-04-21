@@ -16,7 +16,7 @@ var friction = 0.8;
 //   END CONFIGURATION
 // =====================
 
-var level = 2;
+var level = 1;
 var tick = 0;
 var score  = 0;
 var runGame = true;
@@ -30,8 +30,8 @@ initCanvas = function() {
 	canvas.width  = canvasWidth;
 	canvas.height = canvasHeight;
 
-	var audio = new Audio("res/audio/chop_suey.mp3");
-	audio.play();
+	var audio_bg = new Audio("res/audio/chop_suey.mp3");
+	audio_bg.play();
 
 	// controls
 	keys = [];
@@ -42,7 +42,7 @@ initCanvas = function() {
 
 	paddle = new Paddle();
 	ball = new Ball();
-}
+};
 
 Level = function() {
 
@@ -70,7 +70,7 @@ Level = function() {
 				[0,1,2,2,2,3,6,6,6,3,2,2,2,1,0],
 				[1,2,2,2,3,3,3,3,3,3,3,2,2,2,1],
 				[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
-				[0,0,2,0,2,0,2,0,2,0,2,0,2,0,0],
+				[0,0,2,0,2,0,2,0,2,0,2,0,2,0,0]
 			];
 			break;
 		case 3:
@@ -127,15 +127,15 @@ Level = function() {
 				ctx.fillStyle = "black";
 		}
 
-		if (type != 0) {
+		if (type !== 0) {
 			ctx.fillRect(x*this.brickWidth+this.xMargin, y*this.brickHeight, this.brickWidth, this.brickHeight);
 			ctx.strokeStyle="rgba(0,0,0,.25)";
 			ctx.lineWidth = 2;
 			ctx.strokeRect(x*this.brickWidth+this.xMargin, y*this.brickHeight, this.brickWidth, this.brickHeight);
 		}
 
-	}
-}
+	};
+};
 
 Ball = function() {
 
@@ -158,7 +158,7 @@ Ball = function() {
 		this.dy = 0;
 	},
 	this.launch = function() {
-		if ((this.dy == 0) && (this.dx == 0)) {
+		if ((this.dy === 0) && (this.dx === 0)) {
 			this.reset();
 			this.dy = -8;
 			this.dx = (Math.random()*8)-4;
@@ -204,9 +204,9 @@ Ball = function() {
 		this.x += this.dx;
 		this.y += this.dy;
 
-	}
+	};
 
-}
+};
 
 Paddle = function() {
 
@@ -245,9 +245,9 @@ Paddle = function() {
 		if (this.x > 0) {
 			this.dx -= 3;
 		}
-	}
+	};
 
-}
+};
 
 collisionXWithBrick = function() {
 	var collided = false;
@@ -275,7 +275,7 @@ collisionXWithBrick = function() {
 	}
 
 	return collided;
-}
+};
 
 collisionYWithBrick = function() {
 	var collided = false;
@@ -303,7 +303,7 @@ collisionYWithBrick = function() {
 	}
 
 	return collided;
-}
+};
 
 hitBrick = function(brickRow,brickCol) {
 	level.bricks[brickRow][brickCol]--;
@@ -311,15 +311,15 @@ hitBrick = function(brickRow,brickCol) {
 	if (level.bricks[brickRow][brickCol] > 0) {
 		// brick weakened
 		score++;
-		var audio = new Audio("res/audio/beep.mp3");
-		audio.play();
+		var audio_beep = new Audio("res/audio/beep.mp3");
+		audio_beep.play();
 	} else {
 		// brick destroyed
 		score += 5;
-		var audio = new Audio("res/audio/explode.mp3");
-		audio.play();
+		var audio_explode = new Audio("res/audio/explode.mp3");
+		audio_explode.play();
 	}
-}
+};
 
 loseLife = function() {
 	playerLives -= 1;
@@ -330,20 +330,20 @@ loseLife = function() {
 		audio.play();
 		ball.reset();
 	}
-}
+};
 
 startGame = function() {
 	level = new Level();
-}
+};
 
 endGame = function() {
 	var audio = new Audio("res/audio/gameover.mp3");
 	audio.play();
 	runGame = false;
-}
+};
 
 update = function() {
-	if (runGame == true) {
+	if (runGame === true) {
 		if (keys[32] || keys[38]) { // space or up
 			ball.launch();
 		}
@@ -357,7 +357,7 @@ update = function() {
 		paddle.update();
 		ball.update();
 	}
-}
+};
 
 draw = function() {
 	if (!runGame) {
@@ -370,7 +370,7 @@ draw = function() {
 		ball.draw();
 		drawScore();
 	}
-}
+};
 
 animate = function() {
 	update();
@@ -378,14 +378,14 @@ animate = function() {
 	ctx.clearRect(0,0,canvas.width,canvas.height);
 	draw();
 	requestAnimationFrame(animate);
-}
+};
 
 drawScore = function() {
 	ctx.fillStyle = "white";
 	ctx.font = "15px Helvetica";
 	ctx.fillText("Score: "+score, 3, 15);
 	ctx.fillText("Lives: "+playerLives, 3, 30);
-}
+};
 
 // control stuff
 getMousePos = function(canvas, evt) {
@@ -394,7 +394,7 @@ getMousePos = function(canvas, evt) {
 		x: evt.clientX - rect.left,
 		y: evt.clientY - rect.top
 	};
-}
+};
 
 document.body.addEventListener("keydown", function(e) {
 	keys[e.keyCode] = true;
