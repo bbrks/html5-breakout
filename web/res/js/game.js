@@ -2,8 +2,8 @@
  * START CONFIGURATION *
 \*=====================*/
 
-	var enable_sound = false;
-	// var difficulty   = 1.0;
+	var enable_sound = true;
+	var difficulty   = 1;
 
 	var canvasWidth  = 640;
 	var canvasHeight = 450;
@@ -22,8 +22,23 @@ function(callback) {
 	window.setTimeout(callback, 1000 / 60);
 };
 
+Achievements = function() {
+
+	this.achievements = [];
+
+	this.readAchievements = function() {
+
+	};
+
+	this.writeAchievements = function() {
+
+	};
+
+};
+
 Game = function() {
 
+	achievements = new Achievements();
 	sound = new Sound();
 
 	this.state = "";
@@ -76,18 +91,56 @@ Menu = function() {
 	var logo = new Image();
 	logo.src = "res/img/breakout.png";
 
+	this.pauseMenu = function() {
+		this.options = [];
+		this.menuTitle = "Paused";
+		this.options.push("Resume");
+		this.options.push("Settings");
+		this.options.push("Help");
+	}
+
+	this.mainMenu = function() {
+		this.options = [];
+		this.menuTitle = "Main Menu";
+		this.options.push("Play Game");
+		this.options.push("Settings");
+		this.options.push("Help");
+	};
+
+	this.settings = function() {
+		this.options = [];
+		this.menuTitle = "Settings";
+		this.options.push("Toggle Sound");
+		this.options.push("Difficulty");
+		this.options.push("Reset Achievements");
+	};
+
+	this.help = function() {
+		this.options = [];
+		this.menuTitle = "Help";
+		this.options.push("Use arrow keys or mouse to move paddle");
+		this.options.push("Hit space or click to launch ball");
+		this.options.push("Destroy all blocks.");
+	};
+
 	this.draw = function() {
 
-        var pattern = ctx.createPattern(bg, 'repeat');
+		var pattern = ctx.createPattern(bg, 'repeat');
         ctx.fillStyle = pattern;
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
 		ctx.drawImage(logo, (canvasWidth/2)-225, 25);
 
-		ctx.font = "24px Helvetica";
+		ctx.font = "42px Helvetica";
       	ctx.textAlign = 'center';
 
       	var trans = (Math.abs(Math.sin(this.tick*0.05))+0.5)*0.25;
+
+		ctx.fillStyle = "rgba(255,255,255,0.75)";
+
+      	ctx.fillText(this.menuTitle, (canvasWidth/2), 185);
+
+		ctx.font = "24px Helvetica";
 
 		for (var i=0; i < this.options.length; i++) {
 			if (this.selected === i) {
@@ -96,38 +149,46 @@ Menu = function() {
 				gradient.addColorStop(0.5, "rgba(255,255,255,"+(trans+0.5)+")");
 				gradient.addColorStop(1, "rgba(255,255,255,"+trans+")");
 				ctx.fillStyle = gradient;
-				ctx.fillRect(0, (canvasHeight/1.75)+(i*50)-87, canvasWidth, 40);
+				ctx.fillRect(0, (canvasHeight/1.5)+(i*50)-87, canvasWidth, 40);
 				ctx.fillStyle = "#000";
 			} else {
 				ctx.fillStyle = "#fff";
 			}
-			ctx.fillText(this.options[i], (canvasWidth/2), (canvasHeight/1.75)+(i*50)-(this.options.length*20));
+			ctx.fillText(this.options[i], (canvasWidth/2), (canvasHeight/1.5)+(i*50)-(this.options.length*20));
 		}
 
 	};
+
+	this.esc = function() {
+		if (game.state === "menu") {
+			this.mainMenu();
+			sound.paddle_sound.play();
+		} else if (game.state === "pause") {
+			game.state = "playing";
+		}
+	}
 
 	this.up = function() {
 		if (this.selected > 0) {
 			this.selected--;
 		}
+		sound.brick_sound.play();
 	};
 
 	this.down = function() {
 		if (this.selected < this.options.length-1) {
 			this.selected++;
 		}
-	};
-
-	this.left = function() {
-
-	};
-
-	this.right = function() {
-
+		sound.brick_sound.play();
 	};
 
 	this.mousePos = function(x, y) {
-
+		for (var i=0; i < this.options.length; i++) {
+			if (y > (canvasHeight/1.5)+(i*50)-87 &&
+				y < (canvasHeight/1.5)+(i*50)-47) {
+				this.selected = i;
+			}
+		}
 	};
 
 	this.enter = function() {
@@ -135,15 +196,32 @@ Menu = function() {
 			case "Play Game":
 				game.startGame();
 				break;
+			case "Resume":
+				game.state = "playing";
+			case "Settings":
+				menu.settings();
+				break;
+			case "Help":
+				menu.help();
+				break;
+			case "Toggle Sound":
+				enable_sound = !enable_sound;
+				break;
+			case "Reset Achievements":
+				achievements.reset();
+				break;
 			default:
-				console.log("asdf");
+				menu.mainMenu();
 				break;
 		}
+		sound.paddle_sound.play();
 	};
 
-	this.options.push("Play Game");
-	this.options.push("Settings");
-	this.options.push("Help");
+	this.mainMenu();
+
+	if (enable_sound && sound.menu_sound) {
+		sound.menu_sound.play();
+	}
 
 };
 
@@ -513,6 +591,7 @@ Sound = function() {
 	this.brick_sound  = new Audio("res/audio/beep.mp3");
 	this.brick_sound2 = new Audio("res/audio/laser.mp3");
 	this.level_sound = new Audio("res/audio/powerup.mp3");
+	this.menu_sound = new Audio("res/audio/menu.mp3");
 
 };
 
@@ -536,9 +615,10 @@ update = function() {
 			paddle.moveRight();
 		}
 
+		sound.menu_sound.pause();
 		paddle.update();
 		balls.update();
-	} else if (game.state === "menu") {
+	} else if (game.state === "menu" || game.state === "pause") {
 		menu.update();
 	}
 };
@@ -548,13 +628,21 @@ draw = function() {
 		if (level.drawBricks() === 0) {
 			game.level++;
 			game.loadLevel();
-			if (enable_sound && level_sound) {
+			if (enable_sound && sound.level_sound) {
 				sound.level_sound.play();
 			}
 		}
+
+		ctx.fillStyle = "white";
+		ctx.font = "15px Helvetica";
+      	ctx.textAlign = 'left';
+		ctx.fillText("Score: "+level.score, 3, canvasHeight-5);
+      	ctx.textAlign = 'right';
+		ctx.fillText("Lives: "+level.lives, canvasWidth-3, canvasHeight-5);
+
 		paddle.draw();
 		balls.draw();
-	} else if (game.state === "menu") {
+	} else if (game.state === "menu" || game.state === "pause") {
 		menu.draw();
 	}
 };
@@ -580,25 +668,39 @@ getMousePos = function(canvas, evt) {
 	};
 };
 
+document.body.addEventListener('click', function(e) {
+	if (game.state === "menu") {
+		menu.enter();
+	} else if (game.state === "playing") {
+		balls.launch();
+	}
+}, false);
 
 document.body.addEventListener('mousemove', function(e) {
 	var mousePos = getMousePos(canvas, e);
 	if (game.state === "playing") {
 		paddle.x = mousePos.x - paddle.width/2;
-	} else if (game.state === "menu") {
+	} else if (game.state === "menu" || game.state === "pause") {
 		menu.mousePos(mousePos.x, mousePos.y);
 	}
 }, false);
 
 document.body.addEventListener("keydown", function(e) {
 	keys[e.keyCode] = true;
-	if (game.state === "menu") {
+	if (game.state === "menu" || game.state === "pause") {
 		if (e.keyCode === 38) {
 			menu.up();
 		} else if (e.keyCode === 40) {
 			menu.down();
 		} else if (e.keyCode === 13 || e.keyCode === 32) {
 			menu.enter();
+		} else if (e.keyCode === 8 || e.keyCode === 27) {
+			menu.esc();
+		}
+	} else if (game.state === "playing") {
+		if (e.keyCode === 8 || e.keyCode === 27) {
+			menu.pauseMenu();
+			game.state = "pause";
 		}
 	}
 	e.preventDefault();
