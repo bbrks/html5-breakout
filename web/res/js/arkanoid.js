@@ -16,7 +16,7 @@ var friction = 0.8;
 //   END CONFIGURATION
 // =====================
 
-var level = 1;
+var level = 3;
 var tick = 0;
 var score  = 0;
 var runGame = true;
@@ -31,7 +31,7 @@ initCanvas = function() {
 	canvas.height = canvasHeight;
 
 	var audio_bg = new Audio("res/audio/chop_suey.mp3");
-	audio_bg.play();
+	// audio_bg.play();
 
 	// controls
 	keys = [];
@@ -52,6 +52,7 @@ Level = function() {
 	switch (level) {
 		case 0:
 			this.bricks = [
+				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 				[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 				[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 				[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
@@ -59,6 +60,7 @@ Level = function() {
 			break;
 		case 1:
 			this.bricks = [
+				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 				[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
 				[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
 				[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
@@ -66,6 +68,7 @@ Level = function() {
 			break;
 		case 2:
 			this.bricks = [
+				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 				[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
 				[0,1,2,2,2,3,6,6,6,3,2,2,2,1,0],
 				[1,2,2,2,3,3,3,3,3,3,3,2,2,2,1],
@@ -75,6 +78,7 @@ Level = function() {
 			break;
 		case 3:
 			this.bricks = [
+				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 				[1,1,5,5,4,4,5,6,5,4,4,5,5,1,1],
 				[3,1,1,5,5,4,4,5,4,4,5,5,1,1,3],
 				[2,3,1,1,5,5,4,5,4,5,5,1,1,3,2],
@@ -84,6 +88,7 @@ Level = function() {
 			break;
 		default:
 			this.bricks = [
+				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 				[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
 				[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
 				[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
@@ -318,7 +323,28 @@ hitBrick = function(brickRow,brickCol) {
 		score += 5;
 		var audio_explode = new Audio("res/audio/explode.mp3");
 		audio_explode.play();
+		pu = new powerupDrop(brickRow,brickCol);
+		pu.draw();
 	}
+};
+
+powerupDrop = function(brickRow,brickCol) {
+
+	this.x = brickCol*level.brickWidth+level.xMargin;
+	this.y = brickRow*level.brickHeight;
+
+	this.update = function() {
+		this.y += 3;
+	};
+	this.draw = function() {
+		this.update();
+		ctx.fillStyle = "#fff";
+		ctx.fillRect(this.x,this.y,40,20);
+		ctx.strokeStyle="rgba(0,0,0,.25)";
+		ctx.lineWidth = 2;
+		ctx.strokeRect(this.x,this.y,40,20);
+	};
+
 };
 
 loseLife = function() {
@@ -368,7 +394,7 @@ draw = function() {
 		level.drawBricks();
 		paddle.draw();
 		ball.draw();
-		drawScore();
+		// drawScore();
 	}
 };
 
