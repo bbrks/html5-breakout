@@ -489,7 +489,9 @@ Level = function(level) {
 		for (var brickX = 0; brickX < this.bricks.length; brickX++) {
 			for (var brickY = 0; brickY < this.bricks[brickX].length; brickY++) {
 				this.drawBrick(brickY, brickX, this.bricks[brickX][brickY]);
-				count += this.bricks[brickX][brickY];
+				if (this.bricks[brickX][brickY] !== 7) {
+					count += this.bricks[brickX][brickY];
+				}
 			}
 		}
 		return count;
