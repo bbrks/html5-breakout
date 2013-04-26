@@ -28,10 +28,10 @@ h2 {
 	box-shadow: 0 0 5px rgba(0,0,0,0.25);
 }
 
-#about, #controls {
+#about, #controls, #achievements {
 	display: none;
 	width: 640px;
-	height: 450px;
+	min-height: 450px;
 	background: #000;
 	border: 1px solid #000;
 	background: url("../img/starfield.png");
@@ -56,4 +56,12 @@ a {
 
 .tabs a:hover {
 	text-decoration: underline;
+}
+
+li.complete {
+	color: #0f0;
+}
+
+li.notcomplete {
+	color: #666;
 }

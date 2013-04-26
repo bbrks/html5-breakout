@@ -36,17 +36,20 @@ Achievement = function(id, name, description, goal) {
 	this.completed = function() {
 		if (!this.complete) {
 			this.complete = true;
-			storage.achieved += [this];
-			console.log(storage.achieved.toString());
+			sound.level_sound.play();
+			// console.log(storage.achieved.toString());
 		}
 	};
 
 	this.update = function(progress) {
 		this.progress += progress;
+
 		if (this.progress >= this.goal) {
 			this.completed();
 		}
-		console.log(this.id+":"+this.progress+"/"+this.goal);
+
+		storage.print();
+		// console.log(this.id+":"+this.progress+"/"+this.goal);
 	};
 
 };
@@ -55,37 +58,61 @@ Storage = function() {
 
 	ach0 = new Achievement("highscore", "High Score", "", 9999999999);
 
-	ach1 = new Achievement("d5blcks", "Pentablock", "Destroy 5 blocks.", 5);
-	ach2 = new Achievement("d10blcks", "Decablock", "Destroy 10 blocks.", 10);
-	ach3 = new Achievement("d100blcks", "Century", "Destroy 100 blocks.", 100);
-	ach4 = new Achievement("d500blcks", "Half a millennia", "Destroy 500 blocks.", 500);
+	ach1 = new Achievement("d5blcks", "Pentablock", "Destroy 5 blocks", 5);
+	ach2 = new Achievement("d10blcks", "Decablock", "Destroy 10 blocks", 10);
+	ach3 = new Achievement("d100blcks", "Century", "Destroy 100 blocks", 100);
+	ach4 = new Achievement("d500blcks", "Half a millennia", "Destroy 500 blocks", 500);
 
-	ach5 = new Achievement("die", "Ouch!", "Lose a life.", 1);
-	ach6 = new Achievement("die5", "Finished", "Die.", 5);
+	ach5 = new Achievement("die", "Ouch!", "Lose a life", 1);
+	ach6 = new Achievement("die5", "Finished", "Die", 5);
 
 	ach7 = new Achievement("lvl1", "Level 1 Completed!", "Complete level 1", 1);
 	ach8 = new Achievement("lvl2", "Level 2 Completed!", "Complete level 2", 2);
 	ach9 = new Achievement("lvl3", "Level 3 Completed!", "Complete level 3", 3);
 	ach10 = new Achievement("lvl4", "Level 4 Completed!", "Complete level 4", 4);
 	ach11 = new Achievement("lvl5", "Level 5 Completed!", "Complete level 5", 5);
+	ach12 = new Achievement("lvl6", "Level 6 Completed!", "Complete level 6", 6);
+	ach13 = new Achievement("lvl7", "Level 7 Completed!", "Complete level 7", 7);
 
-	this.achievements = [ach0, ach1, ach2, ach3, ach4, ach5, ach6, ach7, ach8, ach9, ach10, ach11];
-	this.achieved = [];
+	this.achievements = [ach0, ach1, ach2, ach3, ach4, ach5, ach6, ach7, ach8, ach9, ach10, ach11, ach12, ach13];
 
 	this.read = function() {
-		this.achieved = localStorage.beb12iwp;
+		this.achievements = localStorage.beb12iwp;
 	};
 
 	this.write = function() {
-		localStorage.beb12iwp = this.achieved;
+		localStorage.beb12iwp = this.achievements;
 	};
 
 	this.reset = function() {
+		for (var i=0; i < this.achievements.length; i++) {
+			this.achievements[i].progress = 0;
+		}
 		localStorage.beb12iwp = [];
 	};
 
 	this.add = function(newitem) {
 		localStorage.beb12iwp += newitem;
+	};
+
+	this.print = function() {
+		var achcount = 0;
+		document.getElementById("achievements").innerHTML = "<h2 class=\"chroma\">Achievements</h2>";
+		document.getElementById("achievements").innerHTML += "<ul>";
+		for (var i=0; i<this.achievements.length; i++) {
+			var liclass = "notcomplete";
+			if (this.achievements[i].complete) {
+				liclass = "complete";
+				achcount += 1;
+			}
+			if (this.achievements[i].id === "highscore") {
+				document.getElementById("achievements").innerHTML += "<li>"+this.achievements[i].name+" : "+this.achievements[i].progress+"</li>";
+			} else {
+				document.getElementById("achievements").innerHTML += "<li class=\""+liclass+"\">"+this.achievements[i].name+" - "+this.achievements[i].description+" ("+this.achievements[i].progress+"/"+this.achievements[i].goal+")</li>";
+			}
+			document.getElementById("achcount").innerHTML = "Achievements ("+achcount+"/"+this.achievements.length+")";
+		}
+		document.getElementById("achievements").innerHTML += "</ul>";
 	};
 
 };
@@ -290,10 +317,12 @@ Menu = function() {
 			case "Sound: On":
 				enable_sound = false;
 				this.options[this.selected] = "Sound: Off";
+				sound.menu_sound.pause();
 				break;
 			case "Sound: Off":
 				enable_sound = true;
 				this.options[this.selected] = "Sound: On";
+				sound.menu_sound.play();
 				break;
 			case "Reset Achievements":
 				achievements.reset();
@@ -318,25 +347,33 @@ Level = function(level) {
 	this.brickWidth  = 40;
 	this.brickHeight = 20;
 
+	this.bricksHoriz = 15;
+
 	this.lives   = 5;
 	this.score   = 0;
 
-	this.bg_music = null;
-	this.maxBrickType = 7;
+	this.maxBrickType = 6;
+
+	bg = new Image();
+	bg.src = "res/img/starfield.png";
 
 	brick = new Image();
 	brick.src = "res/img/brick.png";
+	brick7 = new Image();
+	brick7.src = "res/img/brick7.png";
+	brick8 = new Image();
+	brick8.src = "res/img/brick8.png";
 
 	switch (level) {
 		case 0:
-			this.bg_music = new Audio("res/audio/chop_suey.mp3");
+			this.bg_music0 = new Audio("res/audio/chop_suey.mp3");
 			this.bricks = [
-				[7,0,0,0,0,0,0,0,0,0,0,0,0,0,7],
-				[7,0,0,0,0,0,0,0,0,0,0,0,0,0,7],
-				[7,0,0,0,0,0,0,0,0,0,0,0,0,0,7],
-				[7,0,0,0,0,0,0,0,0,0,0,0,0,0,7],
-				[7,0,0,0,0,0,0,0,0,0,0,0,0,0,7],
-				[7,0,0,0,0,0,0,0,0,0,0,0,0,0,7],
+				[7,8,8,8,0,8,0,0,0,8,0,8,8,0,7],
+				[7,0,8,0,0,8,0,0,0,8,0,8,0,8,7],
+				[7,0,8,0,0,8,0,0,0,8,0,8,0,8,7],
+				[7,0,8,0,0,8,0,8,0,8,0,8,8,0,7],
+				[7,0,8,0,0,8,8,8,8,8,0,8,0,0,7],
+				[7,8,8,8,0,0,8,0,8,0,0,8,0,0,7],
 				[7,7,7,7,7,7,7,7,7,7,7,7,7,7,7],
 				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 				[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -344,14 +381,14 @@ Level = function(level) {
 			];
 			break;
 		case 1:
-			this.bg_music = new Audio("res/audio/menu.mp3");
+			this.bg_music1 = new Audio("res/audio/menu.mp3");
 			this.bricks = [
 				[7,0,0,0,0,0,0,0,0,0,0,0,0,0,7],
-				[7,0,0,0,0,0,0,0,0,0,0,0,0,0,7],
-				[7,0,0,0,0,0,0,0,0,0,0,0,0,0,7],
-				[7,0,0,0,0,0,0,0,0,0,0,0,0,0,7],
-				[7,0,0,0,0,0,0,0,0,0,0,0,0,0,7],
-				[7,0,0,0,0,0,0,0,0,0,0,0,0,0,7],
+				[7,8,8,8,0,0,8,8,8,0,8,0,0,8,7],
+				[7,8,0,0,8,0,8,0,0,0,8,8,0,8,7],
+				[7,8,8,8,8,0,8,8,0,0,8,8,8,8,7],
+				[7,8,0,0,8,0,8,0,0,0,8,0,8,8,7],
+				[7,8,8,8,0,0,8,8,8,0,8,0,0,8,7],
 				[7,7,7,7,7,7,7,7,7,7,7,7,7,7,7],
 				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 				[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
@@ -360,125 +397,119 @@ Level = function(level) {
 			];
 			break;
 		case 2:
-			this.bg_music = new Audio("res/audio/chop_suey.mp3");
+			this.bg_music2 = new Audio("res/audio/menu.mp3");
 			this.bricks = [
-				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-				[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
-				[0,1,2,2,2,3,6,6,6,3,2,2,2,1,0],
-				[1,2,2,2,3,3,3,3,3,3,3,2,2,2,1],
-				[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
-				[0,0,2,0,2,0,2,0,2,0,2,0,2,0,0]
+				[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
+				[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
+				[0,0,0,0,0,0,5,5,5,0,0,0,0,0,0],
+				[6,6,6,6,6,0,0,0,0,0,6,6,6,6,6],
+				[6,1,1,1,6,6,6,6,6,6,6,1,1,1,6],
+				[6,1,1,1,6,6,6,6,6,6,6,1,1,1,6],
+				[6,6,6,6,6,0,0,0,0,0,6,6,6,6,6],
+				[0,0,0,0,0,0,5,5,5,0,0,0,0,0,0],
+				[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
+				[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
 			];
 			break;
 		case 3:
-			this.bg_music = new Audio("res/audio/menu.mp3");
+			this.bg_music3 = new Audio("res/audio/chop_suey.mp3");
 			this.bricks = [
-				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-				[1,1,5,5,4,4,5,6,5,4,4,5,5,1,1],
-				[3,1,1,5,5,4,4,5,4,4,5,5,1,1,3],
-				[2,3,1,1,5,5,4,5,4,5,5,1,1,3,2],
-				[0,2,3,1,1,5,5,5,5,5,1,1,3,2,0],
-				[0,0,2,3,1,1,5,5,5,1,1,3,2,0,0]
-			];
-			break;
-		case 4:
-			this.bg_music = new Audio("res/audio/chop_suey.mp3");
-			this.bricks = [
-				[6,0,6,0,6,0,6,0,6,0,6,0,6,0,6],
-				[0,6,0,6,0,6,0,6,0,6,0,6,0,6,0],
-				[6,0,6,0,6,0,6,0,6,0,6,0,6,0,6],
-				[0,6,0,6,0,6,0,6,0,6,0,6,0,6,0],
-				[6,0,6,0,6,0,6,0,6,0,6,0,6,0,6]
-			];
-			break;
-		case 5:
-			this.bg_music = new Audio("res/audio/menu.mp3");
-			this.bricks = [
-				[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-				[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-				[0,0,0,0,0,0,5,5,5,0,0,0,0,0,0],
-				[6,6,6,6,6,0,0,0,0,0,6,6,6,6,6],
-				[6,1,1,1,6,6,6,6,6,6,6,1,1,1,6],
-				[6,1,1,1,6,6,6,6,6,6,6,1,1,1,6],
-				[6,6,6,6,6,0,0,0,0,0,6,6,6,6,6],
-				[0,0,0,0,0,0,5,5,5,0,0,0,0,0,0],
-				[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-				[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-			];
-			break;
-		case 6:
-			this.bg_music = new Audio("res/audio/chop_suey.mp3");
-			this.bricks = [
-				[6,2,6,6,6,6,6,6,6,6,6,6,6,2,6],
-				[6,0,0,6,0,0,0,6,0,0,0,6,0,0,6],
-				[6,0,0,6,1,6,0,6,0,6,1,6,0,0,6],
-				[6,0,0,6,6,6,0,6,0,6,6,6,0,0,6],
-				[6,0,0,0,0,0,0,6,0,0,0,0,0,0,6],
-				[6,0,0,0,0,0,4,6,4,0,0,0,0,0,6],
-				[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
-				[6,0,0,0,0,0,4,6,4,0,0,0,0,0,6],
-				[6,0,0,0,0,0,0,6,0,0,0,0,0,0,6],
-				[6,0,0,6,6,6,0,6,0,6,6,6,0,0,6],
-				[6,0,0,6,1,6,0,6,0,6,1,6,0,0,6],
-				[6,0,0,6,0,0,0,6,0,0,0,6,0,0,6],
+				[6,2,6,6,6,6,6,7,6,6,6,6,6,2,6],
+				[6,0,0,6,0,0,0,7,0,0,0,6,0,0,6],
+				[6,0,0,6,1,6,0,7,0,6,1,6,0,0,6],
+				[6,0,0,6,6,6,0,7,0,6,6,6,0,0,6],
+				[6,0,0,0,0,0,0,7,0,0,0,0,0,0,6],
+				[6,0,0,0,0,0,4,8,4,0,0,0,0,0,6],
+				[6,7,7,7,7,7,8,8,8,7,7,7,7,7,6],
+				[6,0,0,0,0,0,4,8,4,0,0,0,0,0,6],
+				[6,0,0,0,0,0,0,7,0,0,0,0,0,0,6],
+				[6,0,0,6,6,6,0,7,0,6,6,6,0,0,6],
+				[6,0,0,6,1,6,0,7,0,6,1,6,0,0,6],
+				[6,0,0,6,0,0,0,7,0,0,0,6,0,0,6],
 				[6,2,6,6,6,6,6,7,6,6,6,6,6,2,6],
 			];
 			break;
-		case 7:
-			this.bg_music = new Audio("res/audio/chop_suey.mp3");
+		case 4:
+			this.bg_music4 = new Audio("res/audio/chop_suey.mp3");
 			this.bricks = [
-				[6,2,6,6,6,6,6,6,6,6,6,6,6,2,6],
-				[6,0,0,6,0,0,0,6,0,0,0,6,0,0,6],
-				[6,0,0,6,1,6,0,6,0,6,1,6,0,0,6],
-				[6,0,0,6,6,6,0,6,0,6,6,6,0,0,6],
-				[6,0,0,0,0,0,0,6,0,0,0,0,0,0,6],
-				[6,0,0,0,0,0,4,6,4,0,0,0,0,0,6],
-				[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
-				[6,0,0,0,0,0,4,6,4,0,0,0,0,0,6],
-				[6,0,0,0,0,0,0,6,0,0,0,0,0,0,6],
-				[6,0,0,6,6,6,0,6,0,6,6,6,0,0,6],
-				[6,0,0,6,1,6,0,6,0,6,1,6,0,0,6],
-				[6,0,0,6,0,0,0,6,0,0,0,6,0,0,6],
-				[6,2,6,6,6,6,6,6,6,6,6,6,6,2,6],
+				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+				[6,0,5,5,7,7,8,8,8,7,7,5,5,0,6],
+				[6,0,5,5,4,4,5,5,5,4,4,5,5,0,6],
+				[6,0,5,5,0,3,4,1,4,3,0,5,5,0,6],
+				[6,0,5,5,3,0,4,1,4,0,3,5,5,0,6],
+				[6,0,5,5,0,3,4,1,4,3,0,5,5,0,6],
+				[6,0,5,5,3,0,4,1,4,0,3,5,5,0,6],
+				[6,0,5,5,0,3,4,1,4,3,0,5,5,0,6],
+				[6,0,5,5,3,0,4,1,4,0,3,5,5,0,6],
+				[6,0,5,5,0,3,4,0,4,3,0,5,5,0,6],
+				[6,5,5,5,5,5,4,0,4,5,5,5,5,5,6],
+				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 			];
 			break;
-		case 8:
-			this.bg_music = new Audio("res/audio/menu.mp3");
+		case 5:
+			this.bg_music5 = new Audio("res/audio/chop_suey.mp3");
 			this.bricks = [
-				[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
-				[6,0,0,0,0,0,0,0,0,0,0,0,0,0,6],
-				[6,0,0,0,0,0,0,0,0,0,0,0,0,0,6],
-				[6,6,6,6,6,6,0,0,0,6,6,6,6,6,6],
-				[6,6,6,6,6,6,0,0,0,6,6,6,6,6,6],
-				[6,6,6,6,6,6,0,0,0,6,6,6,6,6,6],
-				[6,6,6,6,6,6,0,0,0,6,6,6,6,6,6],
-				[6,6,6,6,6,6,0,0,0,6,6,6,6,6,6],
+				[7,1,1,1,6,0,0,0,0,0,0,0,0,0,0],
+				[7,1,1,1,6,5,0,0,0,0,0,0,0,0,0],
+				[7,1,1,1,6,5,4,0,0,0,0,0,0,0,0],
+				[7,1,1,1,6,5,4,3,0,0,0,0,0,0,0],
+				[7,1,1,1,6,5,4,3,2,0,0,0,0,0,0],
+				[7,1,1,1,6,5,4,3,2,6,0,0,0,0,0],
+				[7,1,1,1,6,5,4,3,2,6,5,0,0,0,0],
+				[7,1,1,1,6,5,4,3,2,6,5,4,0,0,0],
+				[7,1,1,1,6,5,4,3,2,6,5,4,3,0,0],
+				[7,1,1,1,6,5,4,3,2,6,5,4,3,2,0],
+				[7,7,7,7,7,7,7,7,7,7,7,7,7,7,0],
+				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			];
+			break;
+		case 6:
+			// v hard level, last one?
+			this.bg_music6 = new Audio("res/audio/menu.mp3");
+			this.bricks = [
+				[7,7,7,7,7,7,7,7,7,7,7,7,7,7,7],
+				[7,6,6,6,6,6,6,6,6,6,6,6,6,6,7],
+				[7,6,6,6,6,6,6,6,6,6,6,6,6,6,7],
+				[7,6,6,6,6,6,6,6,6,6,6,6,6,6,7],
+				[7,6,6,6,6,6,6,6,6,6,6,6,6,6,7],
+				[7,6,6,6,6,6,6,6,6,6,6,6,6,6,7],
+				[7,6,6,6,6,6,6,6,6,6,6,6,6,6,7],
+				[7,6,6,6,6,6,6,6,6,6,6,6,6,6,7],
+				[7,1,1,1,1,1,1,1,1,1,1,1,1,1,7],
+				[7,1,1,1,1,1,1,1,1,1,1,1,1,1,7],
+				[7,1,1,1,1,1,1,1,1,1,1,1,1,1,7],
+				[7,1,1,1,1,1,1,1,1,1,1,1,1,1,7],
+				[7,7,7,7,7,7,8,1,8,7,7,7,7,7,7]
 			];
 			break;
 		default:
+			// make a randomised level! :D
 			this.bg_music = new Audio("res/audio/chop_suey.mp3");
+			for (var i = 0; i < 15; i++) {
+				eval("var rand"+i+" = Math.floor(Math.random()*8);");
+			}
 			this.bricks = [
-				[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-				[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
-				[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
-				[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
-				[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6]
+				[rand0,rand1,rand2,rand3,rand4,rand5,rand6,rand7,rand8,rand9,rand10,rand11,rand12,rand13,rand14],
+				[rand13,rand5,rand7,rand8,rand6,rand10,rand11,rand4,rand8,rand2,rand14,rand12,rand3,rand6,rand0],
+				[rand5,rand12,rand3,rand6,rand0,rand4,rand8,rand2,rand14,rand13,rand7,rand8,rand6,rand10,rand11],
+				[rand14,rand12,rand2,rand8,rand8,rand3,rand6,rand10,rand7,rand13,rand5,rand11,rand4,rand6,rand0],
 			];
+
 			break;
 	}
 
 	// This margin is to centre the bricks on screen
-	this.xMargin = (canvasWidth - (this.bricks[level].length) * this.brickWidth) / 2;
+	this.xMargin = (canvasWidth - this.bricksHoriz * this.brickWidth) / 2;
 
-	if (enable_sound && this.bg_music) {
-		this.bg_music.play();
-	}
+	// if (enable_sound) {
+	// 	eval("this.bg_music"+game.level).play();
+	// }
 
 	// loop through the bricks array and draw each brick
 	this.drawBricks = function() {
 
-		var bg = new Image();
-		bg.src = "res/img/starfield.png";
 		var pattern = ctx.createPattern(bg, 'repeat');
         ctx.fillStyle = pattern;
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -489,7 +520,7 @@ Level = function(level) {
 		for (var brickX = 0; brickX < this.bricks.length; brickX++) {
 			for (var brickY = 0; brickY < this.bricks[brickX].length; brickY++) {
 				this.drawBrick(brickY, brickX, this.bricks[brickX][brickY]);
-				if (this.bricks[brickX][brickY] !== 7) {
+				if (this.bricks[brickX][brickY] < 7) {
 					count += this.bricks[brickX][brickY];
 				}
 			}
@@ -501,7 +532,11 @@ Level = function(level) {
 	this.drawBrick = function(brickX, brickY, brickType) {
 
 		var hue = Math.floor((brickType/this.maxBrickType)*360);
-		ctx.fillStyle = "hsl("+hue+", 100%, 80%)";
+		if (brickType === 1) {
+			ctx.fillStyle = "hsla("+hue+", 100%, 80%, 0.5)";
+		} else {
+			ctx.fillStyle = "hsl("+hue+", 100%, 80%)";
+		}
 
 		if (brickType !== 0) {
 			ctx.fillRect(brickX * this.brickWidth + this.xMargin, brickY * this.brickHeight, this.brickWidth, this.brickHeight);
@@ -510,39 +545,42 @@ Level = function(level) {
 			// ctx.strokeRect(brickX * this.brickWidth + this.xMargin, brickY * this.brickHeight, this.brickWidth, this.brickHeight);
 
 			if (brickType > 1 && brickType < 7 ) {
-				brick.src = "res/img/brick.png";
-			} else if (brickType === 1) {
-				var rand = Math.floor(Math.random()*3)+1;
-				brick.src = "res/img/brick-hit"+rand+".png";
 				ctx.drawImage(brick, brickX * this.brickWidth + this.xMargin, brickY * this.brickHeight);
+			} else if (brickType === 1) {
+				ctx.fillStyle = "hsla("+hue+", 100%, 80%, 0.1)";
+				var rand = Math.floor(Math.random()*3)+1;
+				brickhit = new Image();
+				brickhit.src = "res/img/brick-hit"+rand+".png";
+				ctx.drawImage(brickhit, brickX * this.brickWidth + this.xMargin, brickY * this.brickHeight);
 			} else if (brickType === 7) {
-				brick.src = "res/img/brick6.png";
+				ctx.drawImage(brick7, brickX * this.brickWidth + this.xMargin, brickY * this.brickHeight);
+			} else if (brickType === 8) {
+				ctx.drawImage(brick8, brickX * this.brickWidth + this.xMargin, brickY * this.brickHeight);
 			}
-
-			ctx.drawImage(brick, brickX * this.brickWidth + this.xMargin, brickY * this.brickHeight);
 		}
 
 	};
 
 	this.hitBrick = function(brickRow,brickCol) {
-		if (this.bricks[brickRow][brickCol] !== 7) {
-			// block 7 is indestructible
+		if (this.bricks[brickRow][brickCol] < 7) {
+			// blocks 7-8 are indestructible
 			this.bricks[brickRow][brickCol]--;
 		}
 
-		if (this.bricks[brickRow][brickCol] > 0 && this.bricks[brickRow][brickCol] !== 7) {
+		if (this.bricks[brickRow][brickCol] > 0 && this.bricks[brickRow][brickCol] < 7) {
 			// brick weakened
 			this.score++;
 			if (enable_sound && sound.brick_sound) {
 				sound.brick_sound.play();
 			}
+			ach0.update(1);
 		} else if (this.bricks[brickRow][brickCol] !== 7) {
 			// brick destroyed
 			this.score += 5;
 			if (enable_sound && sound.brick_sound2) {
 				sound.brick_sound2.play();
 			}
-
+			ach0.update(5);
 			ach1.update(1);
 			ach2.update(1);
 			ach3.update(1);
@@ -573,11 +611,11 @@ Level = function(level) {
 				balls.balls = [];
 				balls.addBall();
 			}
-			ach5.update(1);
-			ach6.update(1);
 		} else {
 			balls.removeBall();
 		}
+			ach5.update(1);
+			ach6.update(1);
 	};
 
 	paddle = new Paddle();
@@ -630,14 +668,17 @@ Ball = function() {
 		}
 
 		// edge + brick collisions
-		if ((this.y < 0) ||
-			this.collisionYWithBrick()) {
+		if (this.y <= 0) {
+			this.dy = Math.abs(this.dy);
+		}
+		if (this.collisionYWithBrick() === 1) {
 			this.dy *= -1;
 		}
 
-		if ((this.x < 0) ||
-			(this.x + this.size > canvasWidth) ||
-			this.collisionXWithBrick()) {
+		if ((this.x < 0) ||	(this.x + this.size > canvasWidth)) {
+			this.dx *= -1;
+		}
+		if (this.collisionXWithBrick() === 1) {
 			this.dx *= -1;
 		}
 
@@ -662,7 +703,7 @@ Ball = function() {
 	};
 
 	this.collisionXWithBrick = function() {
-		var collided = false;
+		var collided = 0;
 
 		for (var brickRow=0; brickRow<level.bricks.length; brickRow++) {
 			for (var brickCol=0; brickCol<level.bricks[brickRow].length; brickCol++) {
@@ -677,7 +718,12 @@ Ball = function() {
 						if (((ball.y + ball.dy >= brickY) && (ball.y + ball.dy <= brickY + level.brickHeight)) ||
 							((ball.y + ball.dy + ball.size >= brickY) && (ball.y + ball.dy + ball.size <= brickY + level.brickHeight))) {
 							level.hitBrick(brickRow,brickCol);
-							collided = true;
+							// console.log(level.bricks[brickRow][brickCol]);
+							if (level.bricks[brickRow][brickCol] === 0) {
+								collided = 2;
+							} else {
+								collided = 1;
+							}
 						}
 					}
 
@@ -690,7 +736,7 @@ Ball = function() {
 	};
 
 	this.collisionYWithBrick = function() {
-		var collided = false;
+		var collided = 0;
 
 		for (var brickRow=0; brickRow<level.bricks.length; brickRow++) {
 			for (var brickCol=0; brickCol<level.bricks[brickRow].length; brickCol++) {
@@ -705,7 +751,13 @@ Ball = function() {
 						if (((ball.x + ball.dx >= brickX) && (ball.x + ball.dx <= brickX + level.brickWidth)) ||
 							((ball.x + ball.dx + ball.size >= brickX) && (ball.x + ball.dx + ball.size <= brickX + level.brickWidth))) {
 							level.hitBrick(brickRow,brickCol);
-							collided = true;
+
+							// console.log(level.bricks[brickRow][brickCol]);
+							if (level.bricks[brickRow][brickCol] === 0) {
+								collided = 2;
+							} else {
+								collided = 1;
+							}
 						}
 					}
 
@@ -816,6 +868,8 @@ init = function() {
 	menu = new Menu();
 	game.state = "menu";
 
+	storage.print();
+
 };
 
 update = function() {
@@ -842,6 +896,13 @@ draw = function() {
 	if (game.state === "playing") {
 		if (level.drawBricks() === 0) {
 			game.level++;
+			ach7.update(1);
+			ach8.update(1);
+			ach9.update(1);
+			ach10.update(1);
+			ach11.update(1);
+			ach12.update(1);
+			ach13.update(1);
 			game.loadLevel();
 			if (enable_sound && sound.level_sound) {
 				sound.level_sound.play();
@@ -922,6 +983,13 @@ document.getElementById("canvas").addEventListener("keydown", function(e) {
 		if (e.keyCode === 13) {
 			game.level++;
 			game.loadLevel();
+			ach7.update(1);
+			ach8.update(1);
+			ach9.update(1);
+			ach10.update(1);
+			ach11.update(1);
+			ach12.update(1);
+			ach13.update(1);
 		}
 	}
 	e.preventDefault();

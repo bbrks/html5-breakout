@@ -15,6 +15,7 @@
 			<div class="tabs">
 				<a onclick="play()">Play</a>
 				<a onclick="controls()">Controls</a>
+				<a onclick="achievements()" id="achcount">Achievements</a>
 				<a onclick="about()">About</a>
 			</div>
 
@@ -45,6 +46,12 @@
 				</p>
 			</div>
 
+			<div id="achievements">
+				<ul>
+					<li>No Achievements yet! :(</li>
+				</ul>
+			</div>
+
 			<canvas id="canvas">
 				<p>Sorry, your browser doesn't support canvas. Try <a href="http://chrome.google.com">Google Chrome</a>.</p>
 			</canvas>
@@ -56,16 +63,25 @@
 			function about() {
 				document.getElementById("canvas").style.display = "none";
 				document.getElementById("controls").style.display = "none";
+				document.getElementById("achievements").style.display = "none";
 				document.getElementById("about").style.display = "inline-block";
 			}
 			function play() {
 				document.getElementById("canvas").style.display = "inline";
 				document.getElementById("controls").style.display = "none";
+				document.getElementById("achievements").style.display = "none";
 				document.getElementById("about").style.display = "none";
 			}
 			function controls() {
-				document.getElementById("controls").style.display = "inline-block";
 				document.getElementById("canvas").style.display = "none";
+				document.getElementById("controls").style.display = "inline-block";
+				document.getElementById("achievements").style.display = "none";
+				document.getElementById("about").style.display = "none";
+			}
+			function achievements() {
+				document.getElementById("canvas").style.display = "none";
+				document.getElementById("controls").style.display = "none";
+				document.getElementById("achievements").style.display = "inline-block";
 				document.getElementById("about").style.display = "none";
 			}
 		</script>
