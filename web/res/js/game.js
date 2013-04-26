@@ -506,9 +506,9 @@ Level = function(level) {
 	// This margin is to centre the bricks on screen
 	this.xMargin = (canvasWidth - this.bricksHoriz * this.brickWidth) / 2;
 
-	// if (enable_sound) {
-	// 	eval("this.bg_music"+game.level).play();
-	// }
+	if (enable_sound) {
+		eval("this.bg_music"+game.level).play();
+	}
 
 	// loop through the bricks array and draw each brick
 	this.drawBricks = function() {
