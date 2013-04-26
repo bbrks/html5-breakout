@@ -14,15 +14,18 @@
  * END CONFIGURATION *
 \*===================*/
 
-window.requestAnimFrame =
-window.requestAnimationFrame       ||
-window.webkitRequestAnimationFrame ||
-window.mozRequestAnimationFrame    ||
-window.oRequestAnimationFrame      ||
-window.msRequestAnimationFrame     ||
-function(callback) {
-	window.setTimeout(callback, 1000 / 60);
-};
+window.requestAnimFrame = function(){
+    return (
+        window.requestAnimationFrame       ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame    ||
+        window.oRequestAnimationFrame      ||
+        window.msRequestAnimationFrame     ||
+        function(/* function */ callback){
+            window.setTimeout(callback, 1000 / 60);
+        }
+    );
+}();
 
 Achievement = function(id, name, description, goal) {
 
@@ -929,7 +932,7 @@ animate = function() {
 	update();
 	ctx.clearRect(0,0,canvas.width,canvas.height);
 	draw();
-	requestAnimationFrame(animate);
+	requestAnimFrame(animate);
 };
 
 window.addEventListener("load", function() {
