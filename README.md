@@ -1,4 +1,4 @@
-iwp-canvas
-==========
+html5-breakout
+==============
 
-A HTML5 Canvas game made for my Interactive Web Programming module
+A Breakout style HTML5 Canvas game made for my Interactive Web Programming module
