@@ -14,3 +14,7 @@ Screenshots
 ![Game Screenshot](https://raw.github.com/bbrks/html5-breakout/master/screenshots/game1.png)
 
 ![Game Screenshot](https://raw.github.com/bbrks/html5-breakout/master/screenshots/game2.png)
+
+## License
+
+This project is released under the [MIT License](LICENSE)
